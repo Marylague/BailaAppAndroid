@@ -1,7 +1,5 @@
 package com.example.bailaappandroid
 
-// Файл: MainScreen.kt (или в MainActivity.kt)
-
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -15,11 +13,9 @@ import androidx.navigation.compose.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    // 1. Создаем контроллер навигации
     val navController = rememberNavController()
 
     Scaffold(
-        // 2. Указываем, что будет в нижней панели
         bottomBar = {
             NavigationBar {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -32,7 +28,7 @@ fun MainScreen() {
                         icon = { Icon(screen.icon, contentDescription = null) },
                         label = { Text(screen.title) },
                         // Проверяем, активен ли этот элемент
-                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                        selected = currentDestination?.route == screen.route,
                         onClick = {
                             navController.navigate(screen.route) {
                                 // Этот код позволяет избежать накопления экранов в стеке
@@ -53,7 +49,7 @@ fun MainScreen() {
             startDestination = NavigationItem.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(NavigationItem.Home.route) { HomeScreen() }
+            composable(NavigationItem.Home.route) { CatalogScreen() }
             composable(NavigationItem.Cart.route) { CartScreen() }
             composable(NavigationItem.Profile.route) { ProfileScreen() }
         }
