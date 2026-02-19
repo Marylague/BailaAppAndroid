@@ -45,92 +45,93 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.mutableStateMapOf
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CatalogScreen() {
+
     val coroutineScope = rememberCoroutineScope()
+
     val lazyGridState = rememberLazyGridState()
     val lazyRowState = rememberLazyListState()
 
-    val groupedOutfits = remember { FakeData.outfits.groupBy { it.collectionId } }
-    val indexToCollectionIdMap = remember {
-        val map = mutableMapOf<Int, Int>()
-        var currentIndex = 1 // 0 - это stickyHeader
-        groupedOutfits.forEach { (collectionId, outfits) ->
-            // Индекс заголовка
-            map[currentIndex] = collectionId.toInt()
-            currentIndex++
-            // Индексы карточек
-            val numRows = (outfits.size + 1) / 2
-            repeat(numRows) {
-                map[currentIndex] = collectionId.toInt()
-                currentIndex++
+    val groupedOutfits = remember {
+        FakeData.outfits.groupBy { it.collectionId }
+    }
+
+    // ===== map: collectionId -> headerIndex in LazyGrid =====
+    val headerIndexes = remember { mutableStateMapOf<Long, Int>() }
+
+    // ===== активная коллекция по текущему скроллу =====
+    var activeCollectionId by remember { mutableStateOf<Long?>(null) }
+
+    // ===== собираем реальные индексы заголовков =====
+    LaunchedEffect(lazyGridState.layoutInfo.visibleItemsInfo) {
+        lazyGridState.layoutInfo.visibleItemsInfo.forEach { item ->
+            val key = item.key
+            if (key is String && key.startsWith("header_")) {
+                val id = key.removePrefix("header_").toLong()
+                headerIndexes[id] = item.index
             }
         }
-        map
     }
 
-    val collectionIdToHeaderIndexMap = remember {
-        val map = mutableMapOf<Long, Int>()
-        var currentIndex = 1 // 0 - это stickyHeader
-        groupedOutfits.forEach { (collectionId, outfits) ->
-            map[collectionId] = currentIndex
-            // +1 для заголовка, + (outfits.size + 1) / 2 для строк с карточками
-            currentIndex += 1 + (outfits.size + 1) / 2
-        }
-        map
-    }
+    // ===== определяем активную коллекцию по первому видимому header =====
+    LaunchedEffect(lazyGridState.layoutInfo.visibleItemsInfo) {
+        val firstHeader = lazyGridState.layoutInfo.visibleItemsInfo
+            .firstOrNull { it.key is String && (it.key as String).startsWith("header_") }
 
-    val activeCollectionId by remember {
-        derivedStateOf {
-            val firstVisibleItemIndex = lazyGridState.firstVisibleItemIndex
-            // Находим ID коллекции, соответствующий текущему видимому индексу
-            indexToCollectionIdMap[firstVisibleItemIndex]
+        firstHeader?.let {
+            val id = (it.key as String).removePrefix("header_").toLong()
+            activeCollectionId = id
         }
     }
 
+    // ===== автоскролл LazyRow к активному чипу =====
     LaunchedEffect(activeCollectionId) {
         activeCollectionId?.let { id ->
-            val activeIndex = FakeData.collections.indexOfFirst { it.id.toInt() == id }
-            if (activeIndex != -1) {
-                coroutineScope.launch {
-                    lazyRowState.animateScrollToItem(activeIndex)
-                }
+            val index = FakeData.collections.indexOfFirst { it.id == id }
+            if (index != -1) {
+                lazyRowState.animateScrollToItem(index)
             }
         }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
+
         MainSearchBar()
 
         LazyVerticalGrid(
-            state = lazyGridState, // Передаем состояние для отслеживания
+            state = lazyGridState,
             columns = GridCells.Fixed(2),
             modifier = Modifier.padding(horizontal = 8.dp)
         ) {
+
+            // ===== sticky header with chips =====
             stickyHeader {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     LazyRow(
-                        state = lazyRowState, // Передаем состояние для управления
-                        contentPadding = PaddingValues(vertical = 8.dp),
+                        state = lazyRowState,
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(FakeData.collections) { collection ->
+                        items(
+                            items = FakeData.collections,
+                            key = { it.id }
+                        ) { collection ->
+
                             CollectionChip(
                                 collectionName = collection.name,
-                                // --- ШАГ 4: Передаем флаг активности в "чип" ---
-                                isActive = collection.id == (activeCollectionId?.toLong() ?: -1),
+                                isActive = collection.id == activeCollectionId,
                                 onClick = {
                                     coroutineScope.launch {
-                                        // Находим индекс заголовка по ID коллекции
-                                        val headerIndex = collectionIdToHeaderIndexMap[collection.id]
-                                        headerIndex?.let {
-                                            // И просто прокручиваем к нему!
-                                            lazyGridState.animateScrollToItem(it)
+                                        headerIndexes[collection.id]?.let { index ->
+                                            lazyGridState.animateScrollToItem(index)
                                         }
                                     }
                                 }
@@ -140,10 +141,18 @@ fun CatalogScreen() {
                 }
             }
 
-            // Выводим сгруппированные данные
+            // ===== grid content =====
             groupedOutfits.forEach { (collectionId, outfitsInCollection) ->
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    val collectionName = FakeData.collections.find { it.id.toLong() == collectionId }?.name ?: ""
+
+                // ----- header -----
+                item(
+                    key = "header_$collectionId",
+                    span = { GridItemSpan(maxLineSpan) }
+                ) {
+                    val collectionName = FakeData.collections
+                        .find { it.id == collectionId }
+                        ?.name ?: ""
+
                     Text(
                         text = collectionName,
                         fontSize = 20.sp,
@@ -151,7 +160,12 @@ fun CatalogScreen() {
                         modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
                     )
                 }
-                items(outfitsInCollection) { outfit ->
+
+                // ----- cards -----
+                items(
+                    items = outfitsInCollection,
+                    key = { it.id }
+                ) { outfit ->
                     OutfitCard(outfit = outfit)
                 }
             }
@@ -159,56 +173,36 @@ fun CatalogScreen() {
     }
 }
 
-private fun createIndexToCollectionIdMap(groupedData: Map<Long, List<Outfit>>): Map<Int, Int> {
-    val map = mutableMapOf<Int, Int>()
-    var currentIndex = 1 // Начинаем с 1, так как 0 - это stickyHeader
-
-    groupedData.forEach { (collectionId, outfits) ->
-        // Индекс заголовка коллекции
-        map[currentIndex] = collectionId.toInt()
-        currentIndex++
-
-        // Индексы товаров в этой коллекции
-        for (i in outfits.indices) {
-            map[currentIndex] = collectionId.toInt()
-            // Для товаров в сетке с 2 колонками, индекс увеличивается не на 1, а на 1/2.
-            // Но для простоты и надежности, можно присваивать ID каждому элементу.
-            if (i % 2 == 1) currentIndex++ // Увеличиваем индекс строки сетки после каждых 2-х товаров
-        }
-        // Если в коллекции нечетное число товаров, все равно нужно увеличить индекс
-        if (outfits.size % 2 != 0) {
-            currentIndex++
-        }
-    }
-    return map
-}
 
 @Composable
-fun CollectionChip(collectionName: String, isActive: Boolean, onClick: () -> Unit) {
-    // Определяем цвет фона в зависимости от состояния
+fun CollectionChip(
+    collectionName: String,
+    isActive: Boolean,
+    onClick: () -> Unit
+) {
     val backgroundColor = if (isActive) {
-        MaterialTheme.colorScheme.primary // Яркий цвет для активного
+        MaterialTheme.colorScheme.primary
     } else {
-        Color.LightGray.copy(alpha = 0.5f) // Стандартный для неактивного
+        MaterialTheme.colorScheme.surfaceVariant
     }
 
-    // Определяем цвет текста
     val textColor = if (isActive) {
-        MaterialTheme.colorScheme.onPrimary // Контрастный цвет для текста на primary
+        MaterialTheme.colorScheme.onPrimary
     } else {
-        MaterialTheme.colorScheme.onSurface // Стандартный цвет текста
+        MaterialTheme.colorScheme.onSurface
     }
 
     Text(
         text = collectionName,
         color = textColor,
         modifier = Modifier
-            .clickable(onClick = onClick)
             .clip(RoundedCornerShape(16.dp))
             .background(backgroundColor)
+            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 8.dp)
     )
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
