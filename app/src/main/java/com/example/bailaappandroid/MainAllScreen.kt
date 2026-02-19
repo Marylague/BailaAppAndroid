@@ -5,7 +5,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
 
@@ -27,11 +26,9 @@ fun MainScreen() {
                     NavigationBarItem(
                         icon = { Icon(screen.icon, contentDescription = null) },
                         label = { Text(screen.title) },
-                        // Проверяем, активен ли этот элемент
                         selected = currentDestination?.route == screen.route,
                         onClick = {
                             navController.navigate(screen.route) {
-                                // Этот код позволяет избежать накопления экранов в стеке
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }

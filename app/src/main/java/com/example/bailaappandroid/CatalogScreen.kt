@@ -40,7 +40,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -61,13 +60,10 @@ fun CatalogScreen() {
         FakeData.outfits.groupBy { it.collectionId }
     }
 
-    // ===== map: collectionId -> headerIndex in LazyGrid =====
     val headerIndexes = remember { mutableStateMapOf<Long, Int>() }
 
-    // ===== активная коллекция по текущему скроллу =====
     var activeCollectionId by remember { mutableStateOf<Long?>(null) }
 
-    // ===== собираем реальные индексы заголовков =====
     LaunchedEffect(lazyGridState.layoutInfo.visibleItemsInfo) {
         lazyGridState.layoutInfo.visibleItemsInfo.forEach { item ->
             val key = item.key
@@ -78,7 +74,6 @@ fun CatalogScreen() {
         }
     }
 
-    // ===== определяем активную коллекцию по первому видимому header =====
     LaunchedEffect(lazyGridState.layoutInfo.visibleItemsInfo) {
         val firstHeader = lazyGridState.layoutInfo.visibleItemsInfo
             .firstOrNull { it.key is String && (it.key as String).startsWith("header_") }
@@ -89,7 +84,6 @@ fun CatalogScreen() {
         }
     }
 
-    // ===== автоскролл LazyRow к активному чипу =====
     LaunchedEffect(activeCollectionId) {
         activeCollectionId?.let { id ->
             val index = FakeData.collections.indexOfFirst { it.id == id }
@@ -109,7 +103,6 @@ fun CatalogScreen() {
             modifier = Modifier.padding(horizontal = 8.dp)
         ) {
 
-            // ===== sticky header with chips =====
             stickyHeader {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
@@ -141,10 +134,8 @@ fun CatalogScreen() {
                 }
             }
 
-            // ===== grid content =====
             groupedOutfits.forEach { (collectionId, outfitsInCollection) ->
 
-                // ----- header -----
                 item(
                     key = "header_$collectionId",
                     span = { GridItemSpan(maxLineSpan) }
@@ -161,7 +152,6 @@ fun CatalogScreen() {
                     )
                 }
 
-                // ----- cards -----
                 items(
                     items = outfitsInCollection,
                     key = { it.id }
