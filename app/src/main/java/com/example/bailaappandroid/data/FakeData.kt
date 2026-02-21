@@ -1,4 +1,7 @@
-package com.example.bailaappandroid
+package com.example.bailaappandroid.data
+
+import com.example.bailaappandroid.data.FakeData
+import com.example.bailaappandroid.data.Outfit
 
 object FakeData {
     val collections = listOf(

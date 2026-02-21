@@ -1,0 +1,22 @@
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/cartFragment">
+<!--    app:startDestination="@id/catalogFragment">-->
+
+<!--    <fragment-->
+<!--        android:id="@+id/catalogFragment"-->
+<!--        android:name="com.example.bailaappandroid.ui.catalog.CatalogFragment"-->
+<!--        android:label="Каталог"/>-->
+
+    <fragment
+        android:id="@+id/cartFragment"
+        android:name="com.example.bailaappandroid.ui.cart.CartFragment"
+        android:label="Корзина"/>
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.bailaappandroid.ui.profile.ProfileFragment"
+        android:label="Профиль"/>
+
+</navigation>
