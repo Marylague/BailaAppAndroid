@@ -11,12 +11,15 @@
     </style>
 
     <!-- Текстовые стили -->
-    <style name="Text.Normal">
+    <style name="Text">
         <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="Text.Normal" parent="Text">
         <item name="android:lineSpacingExtra">4dp</item>
     </style>
 
-    <style name="Text.Title">
+    <style name="Text.Title" parent="Text">
         <item name="android:textSize">20sp</item>
         <item name="android:textStyle">bold</item>
     </style>
