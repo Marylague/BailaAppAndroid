@@ -3,13 +3,9 @@ package com.example.bailaappandroid
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +13,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.font.FontWeight
+import android.view.LayoutInflater
+import android.widget.Button
+import android.widget.EditText
+import androidx.compose.ui.viewinterop.AndroidView
 
 
 @Composable
@@ -149,80 +149,30 @@ fun CartItemRow(item: Outfit) {
 }
 
 @Composable
-fun ProfileScreen() {
+fun ProfileXmlScreen() {
+    AndroidView(
+        modifier = Modifier.fillMaxSize(),
+        factory = { context ->
+            val view = LayoutInflater.from(context)
+                .inflate(R.layout.fragment_profile, null, false)
 
-    var name by remember { mutableStateOf("Иван Иванов") }
-    var email by remember { mutableStateOf("ivan@email.com") }
-    var isEditing by remember { mutableStateOf(false) }
+            val etName = view.findViewById<EditText>(R.id.etName)
+            val etEmail = view.findViewById<EditText>(R.id.etEmail)
+            val btnEdit = view.findViewById<Button>(R.id.btnEdit)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+            var isEditing = false
 
-        Spacer(modifier = Modifier.height(24.dp))
+            etName.setText("Иван Иванов")
+            etEmail.setText("ivan@email.com")
 
-        Icon(
-            imageVector = Icons.Default.Person,
-            contentDescription = null,
-            modifier = Modifier
-                .size(100.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (isEditing) {
-
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Имя") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = { isEditing = false },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Сохранить")
+            btnEdit.setOnClickListener {
+                isEditing = !isEditing
+                etName.isEnabled = isEditing
+                etEmail.isEnabled = isEditing
+                btnEdit.text = if (isEditing) "Сохранить" else "Редактировать"
             }
 
-        } else {
-
-            Text(
-                text = name,
-                style = MaterialTheme.typography.headlineSmall
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = email,
-                style = MaterialTheme.typography.bodyLarge
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = { isEditing = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Редактировать")
-            }
+            view
         }
-    }
+    )
 }

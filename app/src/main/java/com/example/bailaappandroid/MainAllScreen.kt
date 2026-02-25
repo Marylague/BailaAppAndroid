@@ -48,7 +48,9 @@ fun MainScreen() {
         ) {
             composable(NavigationItem.Home.route) { CatalogScreen() }
             composable(NavigationItem.Cart.route) { CartScreen() }
-            composable(NavigationItem.Profile.route) { ProfileScreen() }
+            composable(NavigationItem.Profile.route) {
+                ProfileXmlScreen()
+            }
         }
     }
 }
