@@ -45,19 +45,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CatalogScreen() {
+fun CatalogScreen(viewModel: CatalogViewModel = viewModel()) {
 
+    val collections = viewModel.collections
+    val outfits = viewModel.outfits
     val coroutineScope = rememberCoroutineScope()
 
     val lazyGridState = rememberLazyGridState()
     val lazyRowState = rememberLazyListState()
 
-    val groupedOutfits = remember {
-        FakeData.outfits.groupBy { it.collectionId }
+    val groupedOutfits = remember(outfits) {
+        outfits.groupBy { it.collectionId }
     }
 
     val headerIndexes = remember { mutableStateMapOf<Long, Int>() }
@@ -86,7 +89,7 @@ fun CatalogScreen() {
 
     LaunchedEffect(activeCollectionId) {
         activeCollectionId?.let { id ->
-            val index = FakeData.collections.indexOfFirst { it.id == id }
+            val index = collections.indexOfFirst { it.id == id }
             if (index != -1) {
                 lazyRowState.animateScrollToItem(index)
             }
@@ -114,7 +117,7 @@ fun CatalogScreen() {
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(
-                            items = FakeData.collections,
+                            items = collections,
                             key = { it.id }
                         ) { collection ->
 
@@ -140,7 +143,7 @@ fun CatalogScreen() {
                     key = "header_$collectionId",
                     span = { GridItemSpan(maxLineSpan) }
                 ) {
-                    val collectionName = FakeData.collections
+                    val collectionName = collections
                         .find { it.id == collectionId }
                         ?.name ?: ""
 
