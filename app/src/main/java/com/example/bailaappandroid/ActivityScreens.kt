@@ -35,10 +35,6 @@ fun CartScreen(viewModel: CartViewModel = viewModel()) {
     ) {
 
         Text(
-            text = "Размер корзины: ${cartItems.size} товаров"
-        )
-
-        Text(
             text = "Ваши траты",
             style = MaterialTheme.typography.titleLarge
         )
