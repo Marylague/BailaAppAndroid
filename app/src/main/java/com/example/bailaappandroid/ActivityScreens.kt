@@ -17,17 +17,15 @@ import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @Composable
-fun CartScreen() {
+fun CartScreen(viewModel: CartViewModel = viewModel()) {
 
     val monthlySpending = listOf(1200f, 1800f, 900f, 2200f, 1500f, 2000f)
-    val cartItems = listOf(
-        Outfit(1, "Красное платье", "4500 ₽", "", 1),
-        Outfit(2, "Черные туфли", "3200 ₽", "", 1),
-        Outfit(3, "Сумка", "2800 ₽", "", 2)
-    )
+    val cartItems = viewModel.cartItems
+
     val totalPrice = 4500 + 3200 + 2800
 
     Column(
@@ -35,6 +33,10 @@ fun CartScreen() {
             .fillMaxSize()
             .padding(16.dp)
     ) {
+
+        Text(
+            text = "Размер корзины: ${cartItems.size} товаров"
+        )
 
         Text(
             text = "Ваши траты",
