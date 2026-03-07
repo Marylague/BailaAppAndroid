@@ -147,7 +147,7 @@ fun CartItemRow(item: Outfit) {
 }
 
 @Composable
-fun ProfileXmlScreen() {
+fun ProfileXmlScreen(viewModel: ProfileViewModel = viewModel()) {
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { context ->
@@ -158,11 +158,14 @@ fun ProfileXmlScreen() {
             val etEmail = view.findViewById<EditText>(R.id.etEmail)
             val btnEdit = view.findViewById<Button>(R.id.btnEdit)
 
+            val profile = viewModel.profile
+
+            profile?.let {
+                etName.setText(it.name)
+                etEmail.setText(it.email)
+            }
+
             var isEditing = false
-
-            etName.setText("Иван Иванов")
-            etEmail.setText("ivan@email.com")
-
             btnEdit.setOnClickListener {
                 isEditing = !isEditing
                 etName.isEnabled = isEditing

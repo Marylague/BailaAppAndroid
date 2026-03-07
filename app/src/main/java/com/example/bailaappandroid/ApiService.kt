@@ -7,4 +7,7 @@ interface ApiService {
 
     @GET("cart")
     suspend fun getCart() : CartResponse
+
+    @GET("profile")
+    suspend fun getProfile(): ProfileResponse
 }
