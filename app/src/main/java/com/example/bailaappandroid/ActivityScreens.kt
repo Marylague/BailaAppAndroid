@@ -148,17 +148,19 @@ fun CartItemRow(item: Outfit) {
 
 @Composable
 fun ProfileXmlScreen(viewModel: ProfileViewModel = viewModel()) {
+    val profile = viewModel.profile
+
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { context ->
-            val view = LayoutInflater.from(context)
+            LayoutInflater.from(context)
                 .inflate(R.layout.fragment_profile, null, false)
+        },
+        update = { view ->
 
             val etName = view.findViewById<EditText>(R.id.etName)
             val etEmail = view.findViewById<EditText>(R.id.etEmail)
             val btnEdit = view.findViewById<Button>(R.id.btnEdit)
-
-            val profile = viewModel.profile
 
             profile?.let {
                 etName.setText(it.name)
@@ -166,14 +168,13 @@ fun ProfileXmlScreen(viewModel: ProfileViewModel = viewModel()) {
             }
 
             var isEditing = false
+
             btnEdit.setOnClickListener {
                 isEditing = !isEditing
                 etName.isEnabled = isEditing
                 etEmail.isEnabled = isEditing
                 btnEdit.text = if (isEditing) "Сохранить" else "Редактировать"
             }
-
-            view
         }
     )
 }
