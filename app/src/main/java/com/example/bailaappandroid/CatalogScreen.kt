@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -96,73 +97,77 @@ fun CatalogScreen(viewModel: CatalogViewModel = viewModel()) {
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
 
-        MainSearchBar()
+        Column(modifier = Modifier.fillMaxSize()) {
 
-        LazyVerticalGrid(
-            state = lazyGridState,
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.padding(horizontal = 8.dp)
-        ) {
+            MainSearchBar()
 
-            stickyHeader {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    LazyRow(
-                        state = lazyRowState,
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            LazyVerticalGrid(
+                state = lazyGridState,
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.padding(horizontal = 8.dp)
+            ) {
+
+                stickyHeader {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.background
                     ) {
-                        items(
-                            items = collections,
-                            key = { it.id }
-                        ) { collection ->
+                        LazyRow(
+                            state = lazyRowState,
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(
+                                items = collections,
+                                key = { it.id }
+                            ) { collection ->
 
-                            CollectionChip(
-                                collectionName = collection.name,
-                                isActive = collection.id == activeCollectionId,
-                                onClick = {
-                                    coroutineScope.launch {
-                                        headerIndexes[collection.id]?.let { index ->
-                                            lazyGridState.animateScrollToItem(index)
+                                CollectionChip(
+                                    collectionName = collection.name,
+                                    isActive = collection.id == activeCollectionId,
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            headerIndexes[collection.id]?.let { index ->
+                                                lazyGridState.animateScrollToItem(index)
+                                            }
                                         }
                                     }
-                                }
-                            )
+                                )
+                            }
                         }
                     }
                 }
-            }
 
-            groupedOutfits.forEach { (collectionId, outfitsInCollection) ->
+                groupedOutfits.forEach { (collectionId, outfitsInCollection) ->
 
-                item(
-                    key = "header_$collectionId",
-                    span = { GridItemSpan(maxLineSpan) }
-                ) {
-                    val collectionName = collections
-                        .find { it.id == collectionId }
-                        ?.name ?: ""
+                    item(
+                        key = "header_$collectionId",
+                        span = { GridItemSpan(maxLineSpan) }
+                    ) {
+                        val collectionName = collections
+                            .find { it.id == collectionId }
+                            ?.name ?: ""
 
-                    Text(
-                        text = collectionName,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
-                    )
-                }
+                        Text(
+                            text = collectionName,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
+                        )
+                    }
 
-                items(
-                    items = outfitsInCollection,
-                    key = { it.id }
-                ) { outfit ->
-                    OutfitCard(outfit = outfit)
+                    items(
+                        items = outfitsInCollection,
+                        key = { it.id }
+                    ) { outfit ->
+                        OutfitCard(outfit = outfit)
+                    }
                 }
             }
         }
+        SnowfallAnimation()
     }
 }
 
