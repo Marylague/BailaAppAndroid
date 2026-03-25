@@ -1,5 +1,6 @@
 package com.example.bailaappandroid
 
+import android.graphics.Paint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +17,12 @@ import androidx.compose.ui.text.font.FontWeight
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -81,8 +88,22 @@ fun CartScreen(viewModel: CartViewModel = viewModel()) {
 
 @Composable
 fun SpendingChart(data: List<Float>) {
-
     val maxValue = data.maxOrNull() ?: 0f
+
+    val barHeights = remember { mutableStateListOf<Float>().apply { repeat(data.size) { add(0f) } } }
+
+    LaunchedEffect(Unit) {
+        data.forEachIndexed { index, targetValue ->
+            barHeights[index] = (targetValue / maxValue) * 300f
+        }
+    }
+
+    val animatedHeights = barHeights.map { targetHeight ->
+        animateFloatAsState(
+            targetValue = targetHeight,
+            animationSpec = tween(durationMillis = 1500)
+        ).value
+    }
 
     val barColor = MaterialTheme.colorScheme.primary
 
@@ -97,12 +118,10 @@ fun SpendingChart(data: List<Float>) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-
             val barWidth = size.width / (data.size * 1.5f)
 
             data.forEachIndexed { index, value ->
-
-                val barHeight = (value / maxValue) * size.height
+                val barHeight = animatedHeights[index]
 
                 drawRect(
                     color = barColor,
@@ -112,11 +131,21 @@ fun SpendingChart(data: List<Float>) {
                     ),
                     size = Size(barWidth, barHeight)
                 )
+
+                drawContext.canvas.nativeCanvas.drawText(
+                    "$value ₽",
+                    index * barWidth * 1.5f + barWidth / 2,
+                    size.height - barHeight - 10,
+                    Paint().apply {
+                        color = android.graphics.Color.BLACK
+                        textSize = 32f
+                        textAlign = Paint.Align.CENTER
+                    }
+                )
             }
         }
     }
 }
-
 @Composable
 fun CartItemRow(item: Outfit) {
 
