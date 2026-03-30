@@ -1,4 +1,4 @@
-package com.example.bailaappandroid
+package com.example.bailaappandroid.presentation.catalog.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -18,6 +18,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.bailaappandroid.data.model.Outfit
 
 @Composable
 fun OutfitCard(outfit: Outfit) {

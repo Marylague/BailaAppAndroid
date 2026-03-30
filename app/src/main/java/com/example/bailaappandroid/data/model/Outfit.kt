@@ -1,9 +1,4 @@
-package com.example.bailaappandroid
-
-data class Collection (
-    val id: Long,
-    val name: String
-)
+package com.example.bailaappandroid.data.model
 
 data class Outfit (
     val id: Long,

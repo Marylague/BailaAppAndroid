@@ -1,4 +1,4 @@
-package com.example.bailaappandroid
+package com.example.bailaappandroid.presentation.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
@@ -7,7 +7,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,16 +40,9 @@ fun MainScreen() {
             }
         }
     ) { innerPadding ->
-        NavHost(
+        AppNavHost(
             navController = navController,
-            startDestination = NavigationItem.Home.route,
             modifier = Modifier.padding(innerPadding)
-        ) {
-            composable(NavigationItem.Home.route) { CatalogScreen() }
-            composable(NavigationItem.Cart.route) { CartScreen() }
-            composable(NavigationItem.Profile.route) {
-                ProfileXmlScreen()
-            }
-        }
+        )
     }
 }

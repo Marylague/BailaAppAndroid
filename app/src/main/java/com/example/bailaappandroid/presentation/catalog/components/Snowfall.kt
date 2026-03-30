@@ -1,4 +1,4 @@
-package com.example.bailaappandroid
+package com.example.bailaappandroid.presentation.catalog.components
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.animation.core.LinearEasing
@@ -47,7 +47,7 @@ fun SnowfallAnimation() {
             val x = snowflake.x * width
 
             drawCircle(
-                color = Color.Blue.copy(alpha = 0.8f),
+                color = Color(0xFFE0F0FF).copy(alpha = 0.7f),
                 radius = snowflake.size,
                 center = Offset(x, y)
             )

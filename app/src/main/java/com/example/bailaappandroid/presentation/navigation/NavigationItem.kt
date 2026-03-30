@@ -1,4 +1,4 @@
-package com.example.bailaappandroid
+package com.example.bailaappandroid.presentation.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
