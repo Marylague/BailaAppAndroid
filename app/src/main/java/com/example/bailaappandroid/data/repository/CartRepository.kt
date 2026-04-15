@@ -7,7 +7,7 @@ class CartRepository(
     private val api: ApiService
 ) {
 
-    suspend fun getCart(): CartResponse {
-        return api.getCart()
+    suspend fun getCart(path: String = "cart_v1"): CartResponse {
+        return api.getScreenConfig(path)
     }
 }

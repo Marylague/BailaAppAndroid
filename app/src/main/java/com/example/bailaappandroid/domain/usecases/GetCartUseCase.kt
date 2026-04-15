@@ -7,7 +7,7 @@ class GetCartUseCase(
     private val repository: CartRepository
 ) {
 
-    suspend fun execute(): CartResponse {
-        return repository.getCart()
+    suspend fun execute(path: String = "cart_v1"): CartResponse {
+        return repository.getCart(path)
     }
 }

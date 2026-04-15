@@ -1,45 +1,57 @@
 package com.example.bailaappandroid.presentation.cart
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.bailaappandroid.presentation.cart.components.CartItemsBlock
+import com.example.bailaappandroid.presentation.cart.components.CartItemRow
 import com.example.bailaappandroid.presentation.cart.components.CheckoutBlock
 import com.example.bailaappandroid.presentation.cart.components.SpendingBlock
 
 @Composable
 fun CartScreen(viewModel: CartViewModel = viewModel()) {
+    val blocks = viewModel.uiState
 
-    val monthlySpending = listOf(1200f, 1800f, 900f, 2200f, 1500f, 2000f)
-    val cartItems = viewModel.cartItems
-
-    val totalPrice = 4500 + 3200 + 2800
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)
     ) {
-        SpendingBlock(monthlySpending = monthlySpending)
+        blocks.forEach { block ->
+            when (block) {
+                is CartBlock.Spending -> {
+                    item(key = "spending") {
+                        SpendingBlock(monthlySpending = block.data)
+                    }
+                }
 
-        Spacer(modifier = Modifier.height(24.dp))
+                is CartBlock.Items -> {
+                    item(key = "items_header") {
+                        Text(
+                            text = block.title,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                    items(block.list) { item ->
+                        CartItemRow(item)
+                    }
+                }
 
-        CartItemsBlock(
-            cartItems = cartItems,
-            modifier = Modifier.weight(1f)
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        CheckoutBlock(
-            totalPrice = totalPrice.toString(),
-            onCheckoutClick = { }
-        )
+                is CartBlock.Checkout -> {
+                    item(key = "checkout") {
+                        CheckoutBlock(
+                            totalPrice = block.total,
+                            onCheckoutClick = {  }
+                        )
+                    }
+                }
+            }
+        }
     }
 }

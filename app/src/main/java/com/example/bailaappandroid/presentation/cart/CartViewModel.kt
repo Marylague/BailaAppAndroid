@@ -5,14 +5,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.bailaappandroid.data.model.Outfit
 import com.example.bailaappandroid.data.remote.api.RetrofitInstance
+import com.example.bailaappandroid.data.remote.dto.toDomain
 import com.example.bailaappandroid.data.repository.CartRepository
 import com.example.bailaappandroid.domain.usecases.GetCartUseCase
 import kotlinx.coroutines.launch
 
 class CartViewModel : ViewModel() {
-    var cartItems by mutableStateOf<List<Outfit>>(emptyList())
+    var uiState by mutableStateOf<List<CartBlock>>(emptyList())
         private set
 
     private val api = RetrofitInstance.api
@@ -20,14 +20,14 @@ class CartViewModel : ViewModel() {
     private val useCase = GetCartUseCase(repository)
 
     init {
-        loadData()
+        loadScreen()
     }
 
-    private fun loadData() {
+    private fun loadScreen() {
         viewModelScope.launch {
             try {
-                val response = useCase.execute()
-                cartItems = response.cartItems
+                val response = useCase.execute("cart_v1")
+                uiState = response.blocks.mapNotNull { it.toDomain() }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
